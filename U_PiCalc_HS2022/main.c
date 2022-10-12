@@ -33,7 +33,7 @@
 
 void controllerTask(void* pvParameters);
 void leibniztask(void* pvParameters);
-
+//void zweiter Algo
 void vUITask(void *pvParameters);
 float piCalculatet;
 
@@ -44,6 +44,10 @@ EventGroupHandle_t egButtonEvents = NULL;
 #define BUTTON3_SHORT	0x04 //Zurücksetzen des Algorithmus
 #define BUTTON4_SHORT	0x08 //Für Zustand un wechselvom Algorithmus
 #define BUTTON_ALL		0xFF //Reset 
+
+//EventGroup for Alarm State.
+EventGroupHandle_t egPiCalc = NULL;
+#define ALARMSTATE_ENABLED	0x01
 
 
 
@@ -71,20 +75,6 @@ int main(void)
 #define MODE_SecondAlgorythm 2
 
 
-void leibniztask(void* pvParameters) {
-	float pi4 = 1;
-	float pi = 0;
-	uint32_t n = 3;
-	for(;;){
-		pi4 = pi4 -1.0/n + 1.0/(n+2);
-		n = n+4;
-		piCalculatet = pi4 * 4;
-		
-	}
-}
-
-//void Algorithmus...
-
 
 void vUITask(void *pvParameters) {
 	char timestring[20]; //Variable for temporary string
@@ -96,44 +86,34 @@ void vUITask(void *pvParameters) {
 		switch(mode) {
 			case MODE_IDLE: {
 				vDisplayClear(); //Clear Display before rewriting it
-				vDisplayWriteStringAtPos(0,0,"PI-Calc HS202"); //Draw Title
-				sprintf(timestring, "%2i:%02i:%02i", hours, minutes, seconds); //Writing Time into one string, now Pi Number
-				vDisplayWriteStringAtPos(1,0,"Time:       %s", &timestring[0]); //Writing Time string onto Display, now Pi Number
-				if(alarmActivated == true) { //Writing Alarm Time string onto Display, Write Alarm On/Off depending on alarmActivated state.
-					vDisplayWriteStringAtPos(2,0,"Alarm: On   %s", &timestring[0]);
-					}				
-				if(xEventGroupGetBits(egButtonEvents) & BUTTON1_LONG) { //If Button1 is pressed long -> Goto MODE_Leibnitz
+				vDisplayWriteStringAtPos(0,0,"PI-Calc HS2022"); //Draw Title
+				sprintf(timestring, "Hello"); //Writing Text into one string, or Pi Number
+				//vDisplayWriteStringAtPos(1,0,"Time:       %s", &timestring[0]); //Writing Time string onto Display, now Pi Number	
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON1_SHORT) { //If Button1 is pressed long -> Goto MODE_Leibnitz
 					mode = MODE_Leibnitz;
 				}
-				if(xEventGroupGetBits(egButtonEvents) & BUTTON2_LONG) { //If Button2 is pressed long -> Goto MODE_Algorithmus
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON2_SHORT) { //If Button2 is pressed long -> Goto MODE_Algorithmus
 					mode = MODE_SecondAlgorythm;
 				}
 			}
-			case leibnitz
+			case MODE_Leibnitz:
 			{
 				vDisplayClear();
-				vDisplayWriteStringAtPos(0,0,"Set Time");
-				sprintf(timestring, "%2i:%02i:%02i", hours, minutes, seconds); //Writing Time into one string
-				vDisplayWriteStringAtPos(1,0,"Time:       %s", &timestring[0]); //Writing Time string onto Display
-				vDisplayWriteStringAtPos(2,12 + (cursorPos * 3), "^^"); //Draw Cursor Position
-				vDisplayWriteStringAtPos(3,0, "Cur |Dec |Inc |Back"); //Draw Button Info
-				if(xEventGroupGetBits(egButtonEvents) & BUTTON1_SHORT) { //Change Cursor Position
-					cursorPos++;
-					if(cursorPos > 2) {
-						cursorPos = 0; //setzt Cursor wieder zurück auf 0
-					}
-				}
-			case Algorithmus
-				{
-					vDisplayClear();
-					vDisplayWriteStringAtPos(0,0,"Set Time");
-					sprintf(timestring, "%2i:%02i:%02i", hours, minutes, seconds); //Writing Time into one string
-					vDisplayWriteStringAtPos(1,0,"Time:       %s", &timestring[0]); //Writing Time string onto Display
-					vDisplayWriteStringAtPos(2,12 + (cursorPos * 3), "^^"); //Draw Cursor Position
-					vDisplayWriteStringAtPos(3,0, "Cur |Dec |Inc |Back"); //Draw Button Info
-				}
-			}	
-		
+				//vDisplayWriteStringAtPos(0,0"Text 1");
+				sprintf(timestring, "Hello"); 
+				vDisplayWriteStringAtPos(1,0,"Hello", &timestring[0]); 
+				vDisplayWriteStringAtPos(2,0, "Text"); 
+			}
+			case MODE_SecondAlgorythm:
+			{
+				vDisplayClear();
+				//vDisplayWriteStringAtPos(0,0,"Set Time");
+				sprintf(timestring, "Hello"); //Writing Time into one string
+				//vDisplayWriteStringAtPos(1,0,"Text", &timestring[0]);
+				//vDisplayWriteStringAtPos(2,0, "Text"); //Draw Button Info
+			}
+		}	
+	
 		
 		
 void controllerTask(void* pvParameters) {
@@ -163,3 +143,19 @@ void controllerTask(void* pvParameters) {
 		vTaskDelay(10/portTICK_RATE_MS);
 	}
 }
+
+void leibniztask(void* pvParameters) {
+	float pi4 = 1;
+	float pi = 0;
+	uint32_t n = 3;
+	for(;;){
+		pi4 = pi4 -1.0/n + 1.0/(n+2);
+		n = n+4;
+		piCalculatet = pi4 * 4;
+		xEventGroupSetBits(egButtonEvents, BUTTON1_SHORT);
+	}
+}
+
+//void Algorithmus...
+
+//xEventGroupSetBits(egButtonEvents, BUTTON2_SHORT);

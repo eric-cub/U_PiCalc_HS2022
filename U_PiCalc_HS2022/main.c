@@ -101,8 +101,8 @@ void vUITask(void *pvParameters) {
 				vDisplayClear();
 				//vDisplayWriteStringAtPos(0,0"Text 1");
 				sprintf(timestring, "Hello"); 
-				vDisplayWriteStringAtPos(1,0,"Hello", &timestring[0]); 
-				vDisplayWriteStringAtPos(2,0, "Text"); 
+				vDisplayWriteStringAtPos(1,0,"Hello Leibniz", &timestring[0]); 
+				vDisplayWriteStringAtPos(2,0, "Text Leibniz"); 
 			}
 			case MODE_SecondAlgorythm:
 			{
@@ -113,7 +113,8 @@ void vUITask(void *pvParameters) {
 				//vDisplayWriteStringAtPos(2,0, "Text"); //Draw Button Info
 			}
 		}	
-	
+	}
+}
 		
 		
 void controllerTask(void* pvParameters) {
@@ -157,5 +158,6 @@ void leibniztask(void* pvParameters) {
 }
 
 //void Algorithmus...
+
 
 //xEventGroupSetBits(egButtonEvents, BUTTON2_SHORT);

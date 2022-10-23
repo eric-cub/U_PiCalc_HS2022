@@ -42,7 +42,7 @@ EventGroupHandle_t egButtonEvents = NULL;
 #define BUTTON1_SHORT	0x01 //Startet Algorithmus
 #define BUTTON2_SHORT	0x02 //Stoppt Algorithmus
 #define BUTTON3_SHORT	0x04 //Zurücksetzen des Algorithmus
-#define BUTTON4_SHORT	0x08 //Für Zustand un wechselvom Algorithmus
+#define BUTTON4_SHORT	0x08 //Für Zustand un wechsel von Algorithmus
 #define BUTTON_ALL		0xFF //Reset 
 
 //EventGroup for Alarm State.
@@ -73,12 +73,14 @@ int main(void)
 #define MODE_IDLE 0
 #define MODE_Leibnitz 1
 #define MODE_SecondAlgorythm 2
+#define MODE_Base
 
 
 
 void vUITask(void *pvParameters) {
-	char timestring[20]; //Variable for temporary string
+	float Pi_Calc ; //Variable for Pi_Calc
 	uint8_t mode = MODE_IDLE;
+	//uint_fast16_t counter = 0;
 	while(egButtonEvents == NULL) { //Wait for EventGroup to be initialized in other task
 		vTaskDelay(10/portTICK_RATE_MS);
 	}
@@ -87,31 +89,43 @@ void vUITask(void *pvParameters) {
 			case MODE_IDLE: {
 				vDisplayClear(); //Clear Display before rewriting it
 				vDisplayWriteStringAtPos(0,0,"PI-Calc HS2022"); //Draw Title
-				sprintf(timestring, "Hello"); //Writing Text into one string, or Pi Number
 				//vDisplayWriteStringAtPos(1,0,"Time:       %s", &timestring[0]); //Writing Time string onto Display, now Pi Number	
-				if(xEventGroupGetBits(egButtonEvents) & BUTTON1_SHORT) { //If Button1 is pressed long -> Goto MODE_Leibnitz
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON1_SHORT) { //If Button1 is pressed short -> Goto MODE_Leibnitz
 					mode = MODE_Leibnitz;
 				}
-				if(xEventGroupGetBits(egButtonEvents) & BUTTON2_SHORT) { //If Button2 is pressed long -> Goto MODE_Algorithmus
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON2_SHORT) { //If Button2 is pressed short -> Goto MODE_SecondAlgorythm
 					mode = MODE_SecondAlgorythm;
 				}
+				//if (counter == 200 || 400 || 600){
+					//mode = MODE_Base
+					//if (counter == 600){
+						//counter = 0;
+					//}
+				
 			}
 			case MODE_Leibnitz:
 			{
 				vDisplayClear();
 				//vDisplayWriteStringAtPos(0,0"Text 1");
-				sprintf(timestring, "Hello"); 
-				vDisplayWriteStringAtPos(1,0,"Hello Leibniz", &timestring[0]); 
+				vDisplayWriteStringAtPos(1,0,"Hello Leibniz"); 
 				vDisplayWriteStringAtPos(2,0, "Text Leibniz"); 
 			}
 			case MODE_SecondAlgorythm:
 			{
 				vDisplayClear();
-				//vDisplayWriteStringAtPos(0,0,"Set Time");
-				sprintf(timestring, "Hello"); //Writing Time into one string
+				//vDisplayWriteStringAtPos(0,0,"Second Algorythm");
 				//vDisplayWriteStringAtPos(1,0,"Text", &timestring[0]);
 				//vDisplayWriteStringAtPos(2,0, "Text"); //Draw Button Info
 			}
+			case MODE_Base
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON1_SHORT) {
+					vDisplayClear();
+					vDisplayWriteStringAtPos(0,0, "Calculate Pi with Leibniz Algorythm");
+					vDisplayWriteStringAtPos(1,0, "Value: %d", Pi_Calc);
+					vDisplayWriteStringAtPos(2,0, "Time");
+					vDisplayWriteStringAtPos(3,0, "S1 Calc | S2 Stop | S3 Reset | S4 ChgMode");
+				}
+				break;
 		}	
 	}
 }
@@ -157,7 +171,7 @@ void leibniztask(void* pvParameters) {
 	}
 }
 
-//void Algorithmus...
+//void Second Algorithmus...
 
 
 //xEventGroupSetBits(egButtonEvents, BUTTON2_SHORT);

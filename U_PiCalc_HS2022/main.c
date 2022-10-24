@@ -37,17 +37,16 @@ void Kelallur(void* pvParameters);
 void vUITask(void *pvParameters);
 float piCalculatet;
 
+TaskHandle_t leibniz;
+TaskHandle_t Kelullar;
+
 //EventGroup for ButtonEvents.
 EventGroupHandle_t egButtonEvents = NULL;
 #define BUTTON1_SHORT	0x01 //Startet Algorithmus
 #define BUTTON2_SHORT	0x02 //Stoppt Algorithmus
 #define BUTTON3_SHORT	0x04 //Zurücksetzen des Algorithmus
-#define BUTTON4_SHORT	0x08 //Für Zustand un wechsel von Algorithmus
-#define BUTTON_ALL		0xFF //Reset 
-
-//EventGroup for Alarm State.
-EventGroupHandle_t egPiCalc = NULL;
-#define ALARMSTATE_ENABLED	0x01
+#define BUTTON4_SHORT	0x08 //Für Zustand und wechsel von Algorithmus
+//#define BUTTON_ALL		0xFF //Reset 
 
 
 
@@ -87,7 +86,6 @@ void vUITask(void *pvParameters) {
 			case MODE_IDLE: {
 				vDisplayClear(); //Clear Display before rewriting it
 				vDisplayWriteStringAtPos(0,0,"PI-Calc HS2022"); //Draw Title
-				//vDisplayWriteStringAtPos(1,0,"Time:       %s", &timestring[0]); //Writing Time string onto Display, now Pi Number	
 				if(xEventGroupGetBits(egButtonEvents) & BUTTON1_SHORT) { //If Button1 is pressed short -> Goto MODE_Leibnitz
 					mode = MODE_Leibnitz;
 				}
@@ -95,37 +93,54 @@ void vUITask(void *pvParameters) {
 					mode = MODE_Kelallur;
 				}
 				if(xEventGroupGetBits(egButtonEvents) & BUTTON3_SHORT) { //If Button1 is pressed short -> Goto MODE_Base
+					mode = MODE_Base;
 					
 				//if (counter == 200 || 400 || 600){
 					//mode = MODE_Base
 					//if (counter == 600){
 						//counter = 0;
 					//}
-				
-			}
+				}
+				if(getButtonPress(BUTTON4) == SHORT_PRESSED) {
+					xEventGroupSetBits(egButtonEvents, BUTTON4_SHORT);
+					xEventGroupClearBits(egButtonEvents, BUTTON1_SHORT);
+					eTaskState state = eTaskGetState(leibniztask);
+					if(state == eSuspended){
+						vTaskSuspend(Kelallur);
+						vTaskResume(leibniztask);
+					}	else {
+						vTaskSuspend(leibniztask);
+						vTaskResume(Kelallur);
+					}
+							
+						}
+					}
+				}
+			
 			case MODE_Leibnitz:
 			{
 				vDisplayClear();
 				vDisplayWriteStringAtPos(0,0,"Leibniz");
-				vDisplayWriteStringAtPos(1,0,"Hello Leibniz"); 
-				vDisplayWriteStringAtPos(2,0, "Text Leibniz"); 
+				vDisplayWriteStringAtPos(1,0,"Value: %d", Pi_Calc); 
+				vDisplayWriteStringAtPos(2,0, "Time"); 
 			}
 			case MODE_Kelallur:
 			{
 				vDisplayClear();
 				vDisplayWriteStringAtPos(0,0,"Kelallur");
-				vDisplayWriteStringAtPos(1,0,"Text");
-				vDisplayWriteStringAtPos(2,0, "Text"); 
+				vDisplayWriteStringAtPos(1,0,"Value: %d", Pi_Calc);
+				vDisplayWriteStringAtPos(2,0, "Time"); 
 			}
-			case MODE_Base //Homescreen bzw. Menü Auswahl
+			case MODE_Base: //Homescreen bzw. Menü Auswahl
 			 {
 					vDisplayClear();
 					vDisplayWriteStringAtPos(0,0, "Calculate Pi");
-					vDisplayWriteStringAtPos(1,0, "Value: %d", Pi_Calc);
-					vDisplayWriteStringAtPos(2,0, "Time");
-					vDisplayWriteStringAtPos(3,0, "S1 Calc | S2 Stop | S3 Reset | S4 ChgMode");
+					vDisplayWriteStringAtPos(1,0, "Mode Select");
+					vDisplayWriteStringAtPos(2,0, "Time:");
+					vDisplayWriteStringAtPos(3,0, "S1 Start | S2 Stop | S3 Reset | S4 ChgMode");
 				}
 				break;
+			}
 		}	
 	}
 }
@@ -171,13 +186,13 @@ void leibniztask(void* pvParameters) {
 	}
 }
 
-void Kelullar(void* pvParameters) {
+void Kelallur(void* pvParameters) {
 	float pi  = 0;
-	uint32_t n = 3
+	uint32_t n = 3;
 	for(;;){
 		pi = 3 + (4/pow(n, 3) - n) - 4/pow(n+2, 3) - n+2;
 		n = n+4;
-		piCalculatet = pi
+		piCalculatet = pi;
 		xEventGroupSetBits(egButtonEvents, BUTTON2_SHORT);
 	}
 }

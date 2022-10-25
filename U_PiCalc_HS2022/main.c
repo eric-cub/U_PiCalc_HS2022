@@ -54,8 +54,8 @@ int main(void)
 	vInitDisplay();
 	
 	xTaskCreate( controllerTask, (const char *) "control_tsk", configMINIMAL_STACK_SIZE+150, NULL, 3, NULL);
-	xTaskCreate( leibniztask, (const char *) "leibniz_task", configMINIMAL_STACK_SIZE+150, NULL, 1, NULL);
-	xTaskCreate( Kelallur, (const char *) "Algorithmus", configMINIMAL_STACK_SIZE+150, NULL, 1, NULL);
+	xTaskCreate( leibniztask, (const char *) "leibniz_task", configMINIMAL_STACK_SIZE+150, NULL, 1, &leibniz);
+	xTaskCreate( Kelallur, (const char *) "Algorithmus", configMINIMAL_STACK_SIZE+150, NULL, 1, &Kelullar);
 	xTaskCreate( vUITask, (const char *) "uitask", configMINIMAL_STACK_SIZE, NULL, 2, NULL); //Init UITask. Lowest Priority. Least time critical.
 
 	vDisplayClear();
@@ -103,12 +103,17 @@ void vUITask(void *pvParameters) {
 			//		}
 			//	}
 				
-			//	if(xEventGroupGetBits(egButtonEvents) == BUTTON4_SHORT) {
-			//		vTaskResume(Kelullar);
-			//		vTaskSuspend(leibniztask);
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON4_SHORT) {
+					eTaskState state = eTaskGetState(leibniz);
+					if(state == eSuspended){
+						vTaskSuspend(Kelullar);
+						vTaskResume(leibniz);
+					}	else {
+						vTaskSuspend(leibniz);
+						vTaskResume(Kelullar);
+					}
 							
-					//}	
-					//}
+
 			break;
 			
 			case MODE_Leibniz:
@@ -122,7 +127,6 @@ void vUITask(void *pvParameters) {
 			break;
 			case MODE_Kelallur:
 			
-				//vTaskSuspend(Kelallur);
 				sprintf(Pi_Value,"%.7f",Pi_Calc);
 				vDisplayClear();
 				vDisplayWriteStringAtPos(0,0,"Kelallur");
@@ -139,13 +143,14 @@ void vUITask(void *pvParameters) {
 				vDisplayWriteStringAtPos(3,0, "Start|Stop|Reset|ChgMode");
 			
 				break;
-			//}
+			}
 		}	
 		vTaskDelay(500);
 	}
 }
 	
 void leibniztask(void* pvParameters) {
+	vTaskSuspend(leibniz); 
 	float pi4 = 1;
 	//float pi = 0;
 	uint32_t n = 3;
@@ -158,13 +163,14 @@ void leibniztask(void* pvParameters) {
 }
 
 void Kelallur(void* pvParameters) {
-	float pi  = 0;
+	float pi5  = 3;
 	uint32_t n = 3;
 	for(;;){
-		pi = 3 + (4/pow(n, 3) - n) - 4/pow(n+2, 3) - n+2;
+		pi5 = pi5  + (4/(pow(n, 3) - n)) - (4/(pow((n+2), 3) - (n+2)));
 		n = n+4;
-		Pi_Calc = pi;
+		Pi_Calc = pi5;
 		xEventGroupSetBits(egButtonEvents, BUTTON2_SHORT);
+		vTaskDelay(100);
 	}
 }
 		

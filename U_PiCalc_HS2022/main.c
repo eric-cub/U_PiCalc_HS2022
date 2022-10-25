@@ -30,7 +30,6 @@
 
 #include "ButtonHandler.h"
 
-
 void controllerTask(void* pvParameters);
 void leibniztask(void* pvParameters);
 void Kelallur(void* pvParameters);
@@ -46,9 +45,6 @@ EventGroupHandle_t egButtonEvents = NULL;
 #define BUTTON2_SHORT	0x02 //Stoppt Algorithmus
 #define BUTTON3_SHORT	0x04 //Zurücksetzen des Algorithmus
 #define BUTTON4_SHORT	0x08 //Für Zustand und wechsel von Algorithmus
-//#define BUTTON_ALL		0xFF //Reset 
-
-
 
 int main(void)
 {
@@ -56,8 +52,8 @@ int main(void)
 	vInitDisplay();
 	
 	xTaskCreate( controllerTask, (const char *) "control_tsk", configMINIMAL_STACK_SIZE+150, NULL, 3, NULL);
-	xTaskCreate( leibniztask, (const char *) "leibniz_task", configMINIMAL_STACK_SIZE+150, NULL, 1, NULL);
-	xTaskCreate( Kelallur, (const char *) "Algorithmus", configMINIMAL_STACK_SIZE+150, NULL, 1, NULL);
+	xTaskCreate( leibniztask, (const char *) "leibniz_task", configMINIMAL_STACK_SIZE+150, NULL, 2, NULL);
+	xTaskCreate( Kelallur, (const char *) "Algorithmus", configMINIMAL_STACK_SIZE+150, NULL, 2, NULL);
 	xTaskCreate( vUITask, (const char *) "uitask", configMINIMAL_STACK_SIZE, NULL, 1, NULL); //Init UITask. Lowest Priority. Least time critical.
 
 	vDisplayClear();
@@ -70,7 +66,7 @@ int main(void)
 
 //Modes for Finite State Machine
 #define MODE_IDLE 0
-#define MODE_Leibnitz 1
+#define MODE_Leibniz 1
 #define MODE_Kelallur 2
 #define MODE_Base 3
 
@@ -87,12 +83,12 @@ void vUITask(void *pvParameters) {
 				vDisplayClear(); //Clear Display before rewriting it
 				vDisplayWriteStringAtPos(0,0,"PI-Calc HS2022"); //Draw Title
 				if(xEventGroupGetBits(egButtonEvents) & BUTTON1_SHORT) { //If Button1 is pressed short -> Goto MODE_Leibnitz
-					mode = MODE_Leibnitz;
+					mode = MODE_Leibniz;
 				}
 				if(xEventGroupGetBits(egButtonEvents) & BUTTON2_SHORT) { //If Button2 is pressed short -> Goto MODE_Kelallur
 					mode = MODE_Kelallur;
 				}
-				if(xEventGroupGetBits(egButtonEvents) & BUTTON3_SHORT) { //If Button1 is pressed short -> Goto MODE_Base
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON3_SHORT) { //If Button3 is pressed short -> Goto MODE_Base
 					mode = MODE_Base;
 					
 				//if (counter == 200 || 400 || 600){
@@ -117,7 +113,7 @@ void vUITask(void *pvParameters) {
 					}
 				}
 			
-			case MODE_Leibnitz:
+			case MODE_Leibniz:
 			{
 				vDisplayClear();
 				vDisplayWriteStringAtPos(0,0,"Leibniz");
@@ -153,7 +149,7 @@ void controllerTask(void* pvParameters) {
 		updateButtons();
 		if(getButtonPress(BUTTON1) == SHORT_PRESSED) {
 			char pistring[12];
-			sprintf(&pistring[0], "PI: %.8f", piCalculatet);
+			sprintf(&pistring[0], "PI: %.8f", Pi_Calc);
 			vDisplayWriteStringAtPos(1,0, "%s", pistring);
 		}
 		updateButtons();
@@ -181,7 +177,7 @@ void leibniztask(void* pvParameters) {
 	for(;;){
 		pi4 = pi4 -1.0/n + 1.0/(n+2);
 		n = n+4;
-		piCalculatet = pi4 * 4;
+		Pi_Calc = pi4 * 4;
 		xEventGroupSetBits(egButtonEvents, BUTTON1_SHORT);
 	}
 }
@@ -192,7 +188,7 @@ void Kelallur(void* pvParameters) {
 	for(;;){
 		pi = 3 + (4/pow(n, 3) - n) - 4/pow(n+2, 3) - n+2;
 		n = n+4;
-		piCalculatet = pi;
+		Pi_Calc = pi;
 		xEventGroupSetBits(egButtonEvents, BUTTON2_SHORT);
 	}
 }

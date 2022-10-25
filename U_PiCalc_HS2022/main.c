@@ -35,6 +35,7 @@ void leibniztask(void* pvParameters);
 void Kelallur(void* pvParameters);
 void vUITask(void *pvParameters);
 float piCalculatet;
+float pi;
 
 TaskHandle_t leibniz;
 TaskHandle_t Kelullar;
@@ -109,8 +110,8 @@ void vUITask(void *pvParameters) {
 						vTaskResume(Kelallur);
 					}
 							
-						}
-					}
+					//}	
+					//}
 				}
 			
 			case MODE_Leibniz:
@@ -140,7 +141,29 @@ void vUITask(void *pvParameters) {
 		}	
 	}
 }
-		
+	
+void leibniztask(void* pvParameters) {
+	float pi4 = 1;
+	float pi = 0;
+	uint32_t n = 3;
+	for(;;){
+		pi4 = pi4 -1.0/n + 1.0/(n+2);
+		n = n+4;
+		Pi_Calc = pi4 * 4;
+		xEventGroupSetBits(egButtonEvents, BUTTON1_SHORT);
+	}
+}
+
+void Kelallur(void* pvParameters) {
+	float pi  = 0;
+	uint32_t n = 3;
+	for(;;){
+		pi = 3 + (4/pow(n, 3) - n) - 4/pow(n+2, 3) - n+2;
+		n = n+4;
+		Pi_Calc = pi;
+		xEventGroupSetBits(egButtonEvents, BUTTON2_SHORT);
+	}
+}
 		
 void controllerTask(void* pvParameters) {
 	egButtonEvents = xEventGroupCreate();
@@ -167,28 +190,5 @@ void controllerTask(void* pvParameters) {
 			xEventGroupSetBits(egButtonEvents, BUTTON4_SHORT);
 		}
 		vTaskDelay(10/portTICK_RATE_MS);
-	}
-}
-
-void leibniztask(void* pvParameters) {
-	float pi4 = 1;
-	float pi = 0;
-	uint32_t n = 3;
-	for(;;){
-		pi4 = pi4 -1.0/n + 1.0/(n+2);
-		n = n+4;
-		Pi_Calc = pi4 * 4;
-		xEventGroupSetBits(egButtonEvents, BUTTON1_SHORT);
-	}
-}
-
-void Kelallur(void* pvParameters) {
-	float pi  = 0;
-	uint32_t n = 3;
-	for(;;){
-		pi = 3 + (4/pow(n, 3) - n) - 4/pow(n+2, 3) - n+2;
-		n = n+4;
-		Pi_Calc = pi;
-		xEventGroupSetBits(egButtonEvents, BUTTON2_SHORT);
 	}
 }

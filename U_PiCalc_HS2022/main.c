@@ -71,14 +71,12 @@ int main(void)
 #define MODE_Leibniz 1
 #define MODE_Kelallur 2
 #define MODE_Base 3
-#define MODE_Suspend 4
+#define MODE_Time 4
 
 void vUITask(void *pvParameters) {
 	char Pi_Value[12] = ""; //Variable for Pi_Calc
 	//uint16_t counter = 0;
 	mode = MODE_IDLE;
-	//uint_fast16_t counter = 0;
-	//while(egButtonEvents == NULL) { //Wait for EventGroup to be initialized in other task
 		vTaskDelay(10/portTICK_RATE_MS);
 		//uint8_t mode = MODE_Base;
 	
@@ -87,56 +85,47 @@ void vUITask(void *pvParameters) {
 			case MODE_IDLE: 
 				vDisplayClear(); //Clear Display before rewriting it
 				vDisplayWriteStringAtPos(0,0,"PI-Calc HS2022"); //Draw Title
-				vDisplayWriteStringAtPos(1,0, "Trying to fix this");
-				//if(xEventGroupGetBits(egButtonEvents) & BUTTON1_SHORT) { //If Button1 is pressed short -> Goto MODE_Leibnitz
-				//	mode = MODE_Leibniz;
-				//}
-				//if(xEventGroupGetBits(egButtonEvents) & BUTTON2_SHORT) { //If Button2 is pressed short -> Goto MODE_Kelallur
-				//	mode = MODE_Kelallur;
-				//}
-				//if(xEventGroupGetBits(egButtonEvents) & BUTTON3_SHORT) { //If Button3 is pressed short -> Goto MODE_Base
-				//	mode = MODE_Base;
-					
-				//if (counter == 200 || 400 || 600){ //Für die Zählung der Zeit
-					//mode = MODE_Base
-					//if (counter == 600){
-						//counter = 0;
-					//}
-				//}
-				//if(getButtonPress(BUTTON4) == SHORT_PRESSED) {
-				//	xEventGroupSetBits(egButtonEvents, BUTTON4_SHORT);
-				//	xEventGroupClearBits(egButtonEvents, BUTTON1_SHORT);
-		//		eTaskState state = eTaskGetState(leibniztask);
-		//		if(state == eSuspended){
-		//			vTaskSuspend(Kelallur);
-		//			vTaskResume(leibniztask);
-		//		}	else {
-		//			vTaskSuspend(leibniztask);
-		//			vTaskResume(Kelallur);
-		//		}
-			//case MODE_Reset:
-			
+				vDisplayWriteStringAtPos(1,0, "Trying to fix this...");
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON1_SHORT) { //If Button1 is pressed short -> Goto MODE_Leibnitz
+					mode = MODE_Leibniz;
+				}
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON2_SHORT) { //If Button2 is pressed short -> Goto MODE_Kelallur
+					mode = MODE_Kelallur;
+				}
+				if(xEventGroupGetBits(egButtonEvents) & BUTTON3_SHORT) { //If Button3 is pressed short -> Goto MODE_Base
+					mode = MODE_Base;
+				}
+				
+			//	if (counter == 200 || 400 || 600){ //Für die Zählung der Zeit
+			//		mode = MODE_Time
+			//		if (counter >= 600){
+			//			counter = 0;
+			//		}
+			//	}
+				
+			//	if(xEventGroupGetBits(egButtonEvents) == BUTTON4_SHORT) {
+			//		vTaskResume(Kelullar);
+			//		vTaskSuspend(leibniztask);
 							
 					//}	
 					//}
-		//		break;
+			break;
 			
 			case MODE_Leibniz:
 			
 				sprintf(Pi_Value,"%.7f",Pi_Calc);
 				vDisplayClear();
 				vDisplayWriteStringAtPos(0,0,"Leibniz");
-				//vDisplayWriteStringAtPos(1,0,"Value: %d", Pi_Value); 
 				vDisplayWriteStringAtPos(1,0,"Value: %s", Pi_Value);
 				vDisplayWriteStringAtPos(2,0, "Time Calc:"); 
 				vDisplayWriteStringAtPos(3,0, "Start|Stop|Reset|ChgMode");
 			break;
 			case MODE_Kelallur:
 			
+				//vTaskSuspend(Kelallur);
 				sprintf(Pi_Value,"%.7f",Pi_Calc);
 				vDisplayClear();
 				vDisplayWriteStringAtPos(0,0,"Kelallur");
-				//vDisplayWriteStringAtPos(1,0,"Value: %d", Pi_Value);
 				vDisplayWriteStringAtPos(1,0,"Value: %s", Pi_Value);
 				vDisplayWriteStringAtPos(2,0, "Time Calc:"); 
 				vDisplayWriteStringAtPos(3,0, "Start|Stop|Reset|ChgMode");
@@ -190,19 +179,18 @@ void controllerTask(void* pvParameters) {
 		
 		if(getButtonPress(BUTTON1) == SHORT_PRESSED) {
 			xEventGroupSetBits(egButtonEvents, BUTTON1_SHORT);
-			mode = MODE_Leibniz;
+			//mode = MODE_Leibniz;
 		}
 		if(getButtonPress(BUTTON2) == SHORT_PRESSED) {
 			xEventGroupSetBits(egButtonEvents, BUTTON2_SHORT);
-			mode = MODE_Kelallur;
+			//mode = MODE_Kelallur;
 		}
 		if(getButtonPress(BUTTON3) == SHORT_PRESSED) {
 			xEventGroupSetBits(egButtonEvents, BUTTON3_SHORT);
-			mode = MODE_Base;
+			//mode = MODE_Base;
 		}
 		if(getButtonPress(BUTTON4) == SHORT_PRESSED) {
 			xEventGroupSetBits(egButtonEvents, BUTTON4_SHORT);
-			mode = MODE_Suspend;
 		}
 		vTaskDelay(10);
 	}

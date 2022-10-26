@@ -159,6 +159,7 @@ void leibniztask(void* pvParameters) {
 		n = n+4;
 		Pi_Calc = pi4 * 4;
 		xEventGroupSetBits(egButtonEvents, BUTTON1_SHORT);
+		vTaskDelay(100);
 	}
 }
 
